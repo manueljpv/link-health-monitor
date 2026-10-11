@@ -1,0 +1,196 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: GPL-3.0-only · Copyright (C) 2026 Manuel Pérez -->
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Monitor de Conectividade</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#16191d;--ink2:#4b5563;--mut:#8a93a0;--line:#e3e6ea;
+--ok:#1a7f4b;--okbg:#e4f4ec;--warn:#a15c00;--warnbg:#fdf0d8;--bad:#b42318;--badbg:#fde8e6;
+--c0:#2563c9;--c1:#d4691a;--b0:#2159b8;--b1:#b8530d;--dn:#0b7f86;--up:#6d3fc4;--info:#2563c9;--infobg:#e3edfb}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1216;--card:#181c22;--ink:#e8ebef;--ink2:#aab2bd;--mut:#7a8491;--line:#2a313a;
+--ok:#4cc38a;--okbg:#12301f;--warn:#f0b04a;--warnbg:#33260c;--bad:#ff7a6e;--badbg:#3a1613;--c0:#6ea3f5;--c1:#f09a55;--b0:#1d4a9a;--b1:#9a420a;--dn:#3fcfd6;--up:#b79bf2;--info:#7fb0f7;--infobg:#14284a}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,Segoe UI,sans-serif}
+main{max-width:1200px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+h1{font-size:20px;margin:0}.upd{color:var(--mut);font-size:13px}
+.banner{padding:14px 18px;border-radius:12px;font-size:18px;font-weight:600;margin-bottom:14px;display:flex;gap:10px;align-items:center}
+.banner small{font-weight:400;font-size:14px;display:block;opacity:.85}
+.b-ok{background:var(--okbg);color:var(--ok)}.b-warn{background:var(--warnbg);color:var(--warn)}.b-bad{background:var(--badbg);color:var(--bad)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card h2{font-size:17px;margin:0 0 10px}
+.sub{color:var(--ink2);font-size:14px;margin-top:2px}
+.lk{padding:0;overflow:hidden;background:color-mix(in srgb,var(--lc) 7%,var(--card));border:2px solid color-mix(in srgb,var(--lc) 45%,var(--line))}
+.lk.st-degradado{border-color:var(--warn);box-shadow:0 0 0 3px color-mix(in srgb,var(--warn) 25%,transparent)}
+.lk.st-offline{border-color:var(--bad);box-shadow:0 0 0 3px color-mix(in srgb,var(--bad) 30%,transparent);background:color-mix(in srgb,var(--bad) 8%,var(--card))}
+.lk .head{background:var(--lcs);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.lk .head h2{margin:0;font-size:20px;letter-spacing:.01em;flex:1;display:flex;align-items:center;gap:8px}
+.lk .body{padding:14px 16px 16px}
+.dot{width:12px;height:12px;border-radius:3px;display:inline-block}
+.badge{font-size:13px;font-weight:700;padding:3px 12px;border-radius:99px;background:#fff}
+.s-online{color:#14733f}.s-degradado{color:#8a5200}.s-offline{color:#b42318}.s-x{color:#4b5563}
+.tag{font-size:13px;font-weight:800;letter-spacing:.06em;background:#fff;color:#0b5d36;padding:3px 12px;border-radius:99px;display:inline-flex;align-items:center;gap:6px;box-shadow:0 0 0 3px #ffffff55}
+.tag i{width:9px;height:9px;border-radius:50%;background:#1fbf6a;animation:pulse 1.6s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 #1fbf6a99}70%{box-shadow:0 0 0 7px #1fbf6a00}100%{box-shadow:0 0 0 0 #1fbf6a00}}
+@media(prefers-reduced-motion:reduce){.tag i{animation:none}}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 8px}
+.k b{display:block;font-size:24px;font-variant-numeric:tabular-nums}.k span{font-size:12px;color:var(--ink2)}
+.note{font-size:13px;color:var(--ink2);margin-top:6px}.note.main{font-size:14px;color:var(--ink);font-weight:600}.note small{color:var(--mut);font-weight:400}
+.speed{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.speed .sp{padding:10px 14px;border-radius:10px;border-top:4px solid var(--sc);background:color-mix(in srgb,var(--sc) 13%,var(--card))}
+.speed .dn{--sc:var(--dn)}.speed .up{--sc:var(--up)}
+.speed .lbl{display:block;font-size:12px;font-weight:800;letter-spacing:.06em;color:var(--sc)}
+.speed b{font-size:36px;line-height:1.1;font-variant-numeric:tabular-nums;margin-right:6px}
+.speed .arr{display:inline-block;width:.8em;height:.8em;margin-right:.12em;vertical-align:-.04em;fill:none;stroke:var(--sc);stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
+.speed .unit{font-size:14px;color:var(--ink2)}.speed small{display:block;font-size:12px;color:var(--ink2)}
+.speed .when{grid-column:1/-1;padding:2px 4px 0;font-size:12px;color:var(--ink2)}.alert{color:var(--warn);font-weight:600}
+.ctl{display:flex;gap:6px;margin-bottom:10px}
+button{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:5px 12px;cursor:pointer;font:inherit}
+button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.chart{position:relative}svg{width:100%;height:200px;display:block}
+.tip{position:absolute;pointer-events:none;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px;box-shadow:0 2px 8px #0003;display:none;white-space:nowrap;z-index:5}
+.leg{display:flex;gap:16px;font-size:13px;color:var(--ink2);margin-top:6px}
+.scroll{max-height:340px;overflow-y:auto;border:1px solid var(--line);border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:7px 10px}td:first-child{white-space:nowrap}
+th{color:var(--ink2);font-weight:600;font-size:12px;position:sticky;top:0;background:var(--card);box-shadow:0 1px 0 var(--line);z-index:1}
+#sp tr:nth-child(even) td{background:color-mix(in srgb,var(--ink) 6%,transparent)}
+#ev tr.ev td{background:color-mix(in srgb,var(--kc) 10%,transparent)}#ev tr.ev:nth-child(even) td{background:color-mix(in srgb,var(--kc) 20%,transparent)}
+#ev tr.ev td:first-child{border-left:5px solid var(--kc)}
+.kind{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.05em;padding:1px 8px;border-radius:99px;background:var(--kc);color:#fff;margin-right:6px}
+.dnv{color:var(--dn);font-weight:700}.upv{color:var(--up);font-weight:700}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:14px}
+
+.hdr{display:flex;align-items:center;gap:14px}.tvlink{font-size:13px;color:var(--ink2);border:1px solid var(--line);border-radius:8px;padding:4px 10px;text-decoration:none}
+.pct{margin-top:6px;font-size:13px;color:var(--ink)}.pct .bar{height:8px;border-radius:99px;background:color-mix(in srgb,var(--ink) 14%,transparent);margin-top:4px;overflow:hidden}
+.pct .bar i{display:block;height:100%;border-radius:99px;background:var(--pc)}.speed .pct b{font-size:14px;line-height:1.2;margin:0;color:var(--pc)}
+.pct.ok{--pc:var(--ok)}.pct.warn{--pc:var(--warn)}.pct.bad{--pc:var(--bad)}.pct span{color:var(--ink2)}
+.acts{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:2px 4px 0;font-size:12px;color:var(--ink2)}
+.medir{font-size:13px;font-weight:600;border-color:var(--sc0,var(--line))}.medir:disabled{opacity:.55;cursor:not-allowed}
+#toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:99px;font-size:14px;display:none;z-index:20}
+body.tv{overflow:hidden;margin:0}body.tv .nottv{display:none!important}
+body.tv main{position:absolute;width:1280px;height:760px;max-width:none;padding:10px 16px;transform-origin:0 0;display:flex;flex-direction:column;gap:10px;margin:0}
+body.tv header{margin:0}body.tv h1{font-size:24px}body.tv .upd{font-size:26px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+body.tv .banner{margin:0;padding:10px 18px;font-size:20px}body.tv .grid{margin:0;grid-template-columns:1fr 1fr;flex:1}
+body.tv .lk .head{padding:8px 16px}body.tv .lk .body{padding:10px 16px 12px}body.tv .k b{font-size:30px}body.tv .speed b{font-size:40px}body.tv .speed .pct b{font-size:15px}body.tv .speed small,body.tv .note small{display:none}body.tv .speed{margin-top:8px}body.tv .kpis{margin-bottom:2px}
+body.tv #bottom{display:grid;grid-template-columns:1fr 1fr;gap:10px}body.tv #bottom .card{padding:10px 14px}body.tv .two{display:block;margin:0!important}
+body.tv svg{height:120px}body.tv .speed svg.arr{height:.8em}body.tv .scroll{max-height:none;border:0}body.tv #evwrap h2{margin-bottom:6px}body.tv td,body.tv th{padding:4px 8px;font-size:13px}
+#tvexit{display:none}body.tv #tvexit{display:block;position:fixed;right:14px;bottom:14px;z-index:30;opacity:0;pointer-events:none;transition:opacity .25s;background:var(--card);box-shadow:0 2px 10px #0004;font-size:16px;padding:8px 16px}body.tv #tvexit.on{opacity:1;pointer-events:auto}
+@media(max-width:520px){.kpis{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}}
+</style></head><body><main>
+<header><div><h1>Monitor de Conectividade</h1><div class="sub" id="org">Links de internet</div></div><span class="hdr"><a class="tvlink nottv" href="relatorio">Relatório mensal</a><a class="tvlink nottv" href="?tv=1">Modo TV ⛶</a><span class="upd" id="upd">carregando…</span></span></header>
+<div id="banner" class="banner b-x"></div>
+<div class="grid" id="cards"></div>
+<div id="bottom"><div class="card"><div class="ctl nottv" id="ctl"></div>
+<div class="two">
+<div><h2 style="font-size:15px">Latência (ms)</h2><div class="chart" id="ch-rtt"></div></div>
+<div class="nottv"><h2 style="font-size:15px">Perda de pacotes (%)</h2><div class="chart" id="ch-loss"></div></div>
+</div><div class="leg" id="leg"></div></div>
+<div class="two" style="margin-top:14px" id="evwrap">
+<div class="card"><h2 id="evt">Quedas e trocas de link</h2><div class="scroll"><table id="ev"></table></div></div>
+<div class="card nottv"><h2>Histórico de velocidade</h2><div class="scroll"><table id="sp"></table></div></div>
+</div></div>
+</main><a id="tvexit" class="tvlink" href="./">Sair do modo TV ✕</a><div id="toast"></div>
+<script>
+const TV=/[?&]tv\b/.test(location.search);if(TV)document.body.classList.add('tv');
+const COL=['var(--c0)','var(--c1)'];let RANGE=TV?1:6,NAMES=[],H=null;
+const $=id=>document.getElementById(id);
+const fmt=(v,d=0)=>v==null?'—':v.toFixed(d);
+const dt=t=>new Date(t*1000).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+const dur=s=>s<60?s+' s':s<3600?Math.floor(s/60)+' min':s<86400?Math.floor(s/3600)+' h '+Math.floor(s%3600/60)+' min':Math.floor(s/86400)+' d';
+const ICON={online:'●',degradado:'▲',offline:'✕'};
+async function J(u){const r=await fetch(u);return r.json()}
+function banner(s){
+  const L=s.links,on=L.filter(l=>l.state==='online'),off=L.filter(l=>l.state==='offline'),deg=L.filter(l=>l.state==='degradado');
+  const a=s.ativo.link;let cls='b-ok',t='',sub='';
+  if(!L.every(l=>l.state)){cls='b-x';t='Coletando dados…'}
+  else if(off.length===L.length){cls='b-bad';t='SEM INTERNET — todos os links estão offline'}
+  else if(off.length){cls='b-bad';t=`${off.map(l=>l.nome).join(', ')} OFFLINE — operando em ${on.concat(deg).map(l=>l.nome).join(', ')}`;
+    sub=off.map(l=>`${l.nome} fora há ${dur(s.agora-l.since)}`).join(' · ')}
+  else if(deg.length){cls='b-warn';t=`${deg.map(l=>l.nome).join(', ')} com problemas`;sub=deg.map(l=>`${l.nome}: ${l.why}`).join(' · ')}
+  else{t='Todos os links saudáveis'}
+  if(a&&a!=='desconhecido'&&a!=='sem internet'&&L.length>1&&!off.length&&a!==L[0].nome)sub+=(sub?' · ':'')+`Tráfego da rede saindo por ${a}`;
+  $('banner').className='banner '+cls;$('banner').innerHTML=`<div>${t}${sub?`<small>${sub}</small>`:''}</div>`}
+const hm=t=>new Date(t*1000).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+function pct(v,c,garant){
+  if(v==null||!c)return '';
+  const p=v/c*100,[hi,lo]=garant===false?[60,30]:[80,50],lv=p>=hi?'ok':p>=lo?'warn':'bad';
+  const tx=lv==='ok'?'':lv==='warn'?' · abaixo do esperado':' · muito abaixo';
+  return `<div class="pct ${lv}"><b>${p.toFixed(0)}%</b> <span>de ${c} Mbps${garant===false?' (não garantido)':''}${tx}</span><div class="bar"><i style="width:${Math.min(p,100)}%"></i></div></div>`}
+async function medir(nome){
+  try{const r=await fetch('api/medir?link='+encodeURIComponent(nome),{method:'POST'});const j=await r.json();toast(j.msg)}catch(e){toast('sem comunicação com o coletor')}
+  tick()}
+function toast(t){const e=$('toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',4000)}
+function estado(s,l){
+  if(!l.state)return '';
+  const n=s.agora;
+  if(l.state!=='online')return `<div class="note main">${l.state==='offline'?'Fora do ar':'Degradado'} há ${dur(n-l.since)}${l.why?` — ${l.why}`:''}</div>`;
+  const q=l.ultima_queda,m=l.monitorado_desde;
+  return `<div class="note main">${q?`Sem quedas há ${dur(n-q)}`:'Nenhuma queda registrada'}</div>
+  <div class="note"><small>${q?`Última queda em ${dt(q)} · `:''}${m?`monitorando desde ${dt(m)}`:''}</small></div>`}
+function cards(s){
+  $('cards').innerHTML=s.links.map((l,i)=>{
+    const st=l.state||'x',sp=l.speed;
+    return `<div class="card lk st-${st}" style="--lc:${COL[i]};--lcs:var(--b${i})"><div class="head"><h2>${l.nome}</h2>
+    <span class="badge s-${st}">${ICON[st]||'…'} ${st==='x'?'aguardando':st}</span>
+    ${s.ativo.link===l.nome?'<span class="tag"><i></i>LINK ATIVO</span>':''}</div><div class="body">
+    <div class="kpis"><div class="k"><b>${fmt(l.rtt)}</b><span>latência ms</span></div>
+    <div class="k"><b>${fmt(l.loss)}%</b><span>perda</span></div>
+    <div class="k"><b>${fmt(l.jitter,1)}</b><span>jitter ms</span></div>
+    <div class="k"><b>${fmt(l.dns)}</b><span>DNS ms</span></div></div>
+    ${estado(s,l)}
+    <div class="note">IP público: ${l.pub||'—'}</div>
+    ${(l.dns_det&&l.dns_det.length)?`<div class="note nottv">DNS: ${l.dns_det.map(x=>x.ms==null?`<b class="alert">${x.rotulo} ✕</b>`:`${x.rotulo} ${fmt(x.ms)} ms`).join(' · ')}</div>`:''}
+    ${(l.avisos||[]).map(a=>`<div class="note alert">⚠ ${a}</div>`).join('')}
+    <div class="speed">${sp&&(sp.ts||sp.falha)?`<div class="sp dn"><span class="lbl">DOWNLOAD</span><b><svg class="arr" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v15M5 12l7 7 7-7"/></svg>${fmt(sp.down,0)}</b><span class="unit">Mbps</span><small>dados recebidos (baixar)</small>${pct(sp.down,(l.contratado||{}).down,(l.contratado||{}).garantido)}</div>
+    <div class="sp up"><span class="lbl">UPLOAD</span><b><svg class="arr" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21V6M5 12l7-7 7 7"/></svg>${fmt(sp.up,0)}</b><span class="unit">Mbps</span><small>dados enviados (enviar)</small>${pct(sp.up,(l.contratado||{}).up,(l.contratado||{}).garantido)}</div>
+    <div class="acts"><span>${l.medindo?'⏳ Medindo velocidade… (a latência fica pausada por cerca de 1 min)':l.na_fila?'⏳ Medição na fila…':sp.ts?`Último teste válido às ${hm(sp.ts)} (há ${dur(s.agora-sp.ts)})`:'Ainda sem medição válida'}</span>
+    <button class="medir nottv" data-link="${l.nome}" ${(l.medindo||l.na_fila||l.state==='offline'||s.agora<l.medir_libera_em)?'disabled':''} title="Mede download e upload agora (intervalo mínimo de ${Math.round((l.medir_intervalo_s||300)/60)} min entre medições)">⟳ Medir agora</button></div>
+    ${sp.falha?`<div class="when alert">Última tentativa falhou — ${sp.falha}</div>`:''}`
+    :`<div class="when" style="grid-column:1/-1">Teste de velocidade: aguardando a primeira medição…</div>`}</div>
+    ${l.isolamento_ok?'':'<div class="note alert">⚠ Este link tem o mesmo IP público de outro: o firewall está desviando o teste. Verifique a política de rota.</div>'}</div></div>`}).join('')}
+function chart(el,key,unit,series,fixedMin0){
+  const W=600,Ht=200,m={l:40,r:8,t:8,b:22};const root=$(el);
+  const pts=NAMES.map(n=>H.links[n].map(r=>({t:r[0],v:r[key]})));
+  const all=pts.flat().filter(p=>p.v!=null);const t0=Math.min(...pts.flat().map(p=>p.t),Infinity),t1=Date.now()/1000;
+  if(!isFinite(t0)){root.innerHTML='<div class="note">Sem dados ainda.</div>';return}
+  let ymax=Math.max(...all.map(p=>p.v),unit==='%'?5:20)*1.1;
+  const x=t=>m.l+(t-t0)/(t1-t0)*(W-m.l-m.r),y=v=>Ht-m.b-v/ymax*(Ht-m.t-m.b);
+  let g='';for(let i=0;i<=4;i++){const v=ymax*i/4;g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${m.l-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--mut)">${v.toFixed(v<10?1:0)}</text>`}
+  for(let i=0;i<=4;i++){const t=t0+(t1-t0)*i/4;g+=`<text x="${x(t)}" y="${Ht-6}" text-anchor="${i==4?'end':i==0?'start':'middle'}" font-size="11" fill="var(--mut)">${new Date(t*1000).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</text>`}
+  // faixas offline
+  NAMES.forEach((n,i)=>H.links[n].forEach(r=>{if(r[4]>=100)g+=`<rect x="${x(r[0])}" width="${Math.max(2,x(t0+H.bucket)-x(t0))}" y="${m.t}" height="${Ht-m.t-m.b}" fill="var(--bad)" opacity=".12"/>`}));
+  pts.forEach((p,i)=>{let d='',pen=false;p.forEach(q=>{if(q.v==null){pen=false;return}d+=(pen?'L':'M')+x(q.t).toFixed(1)+' '+y(q.v).toFixed(1);pen=true});
+    g+=`<path d="${d}" fill="none" stroke="${COL[i]}" stroke-width="2" stroke-linejoin="round"/>`;
+    const vv=p.filter(q=>q.v!=null);if(vv.length<=3)vv.forEach(q=>{g+=`<circle cx="${x(q.t).toFixed(1)}" cy="${y(q.v).toFixed(1)}" r="3.5" fill="${COL[i]}"/>`})});
+  root.innerHTML=`<svg viewBox="0 0 ${W} ${Ht}" preserveAspectRatio="none">${g}<line class="cx" y1="${m.t}" y2="${Ht-m.b}" stroke="var(--mut)" style="display:none"/></svg><div class="tip"></div>`;
+  const svg=root.querySelector('svg'),tip=root.querySelector('.tip'),cx=root.querySelector('.cx');
+  svg.onmousemove=e=>{const b=svg.getBoundingClientRect(),px=(e.clientX-b.left)/b.width*W,t=t0+(px-m.l)/(W-m.l-m.r)*(t1-t0);
+    let rows=NAMES.map((n,i)=>{const r=H.links[n].reduce((a,c)=>Math.abs(c[0]-t)<Math.abs(a[0]-t)?c:a,H.links[n][0]||[0]);return r&&r[0]&&Math.abs(r[0]-t)<H.bucket*2?`<span style="color:${COL[i]}">■</span> ${n}: <b>${fmt(r[key],unit==='%'?1:0)} ${unit}</b>`:null}).filter(Boolean);
+    if(!rows.length){tip.style.display='none';return}
+    cx.setAttribute('x1',px);cx.setAttribute('x2',px);cx.style.display='';tip.style.display='block';
+    tip.innerHTML=`<div style="color:var(--mut)">${dt(t)}</div>`+rows.join('<br>');
+    tip.style.left=Math.min(e.clientX-b.left+12,b.width-170)+'px';tip.style.top='8px'};
+  svg.onmouseleave=()=>{tip.style.display='none';cx.style.display='none'}}
+function lists(){
+  const K={online:['VOLTOU','var(--ok)'],degradado:['DEGRADOU','var(--warn)'],offline:['CAIU','var(--bad)'],failover:['TROCA','var(--info)'],aviso:['AVISO','#8a6d00']};
+  if(TV)$('evt').textContent='Quedas e trocas de link · hoje'+(H.events.length>5?` (últimos 5 de ${H.events.length})`:'');
+  $('ev').innerHTML='<tr><th>Quando</th><th>Link</th><th>Evento</th></tr>'+(H.events.length?(TV?H.events.slice(0,5):H.events).map(e=>{const k=K[e[2]]||[e[2].toUpperCase(),'var(--ink2)'];
+    return `<tr class="ev" style="--kc:${k[1]}"><td>${dt(e[0])}</td><td>${e[1]}</td><td><span class="kind">${k[0]}</span>${e[3]}</td></tr>`}).join(''):`<tr><td colspan=3>${TV?'Nenhuma queda ou troca hoje.':'Nenhum evento no período.'}</td></tr>`);
+  const s=H.speed.slice().reverse(),cor=n=>`<span class="dot" style="background:${COL[NAMES.indexOf(n)]||'var(--mut)'}"></span> `;
+  $('sp').innerHTML='<tr><th>Quando</th><th>Link</th><th>⬇ Download (Mbps)</th><th>⬆ Upload (Mbps)</th></tr>'+(s.length?s.map(r=>`<tr><td>${dt(r[0])}</td><td>${cor(r[1])}${r[1]}</td><td class="dnv">${fmt(r[2],0)}</td><td class="upv">${fmt(r[3],0)}</td></tr>`).join(''):'<tr><td colspan=4>Aguardando primeiro teste.</td></tr>')}
+async function loadHist(){H=await J('api/history?h='+RANGE+(TV?'&hoje=1':''));NAMES=Object.keys(H.links);
+  $('leg').innerHTML=NAMES.map((n,i)=>`<span><span class="dot" style="background:${COL[i]}"></span> ${n}</span>`).join('')+'<span><span class="dot" style="background:var(--bad);opacity:.3"></span> link sem resposta</span>';
+  chart('ch-rtt',1,'ms');chart('ch-loss',2,'%');lists()}
+async function tick(){try{const s=await J('api/status');banner(s);cards(s);if(!TV)$('upd').textContent='atualizado '+new Date().toLocaleTimeString('pt-BR')}catch(e){$('upd').textContent='⚠ sem comunicação com o coletor'}}
+$('ctl').innerHTML=[[1,'1 h'],[6,'6 h'],[24,'24 h'],[168,'7 dias']].map(([h,t])=>`<button data-h="${h}" aria-pressed="${h===RANGE}">${t}</button>`).join('');
+$('ctl').onclick=e=>{const h=e.target.dataset.h;if(!h)return;RANGE=+h;[...$('ctl').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.h==h));loadHist()};
+$('cards').onclick=e=>{const b=e.target.closest('.medir');if(b&&!b.disabled){b.disabled=true;medir(b.dataset.link)}};
+const MARG=Math.max(0,Math.min(15,parseFloat(new URLSearchParams(location.search).get('margem'))||0));   // &margem=5 reduz o painel em 5% de cada lado (TV que corta as bordas)
+function fit(){const f=1-2*MARG/100,k=Math.min(innerWidth*f/1280,innerHeight*f/760),m=document.querySelector('main');m.style.transform=`scale(${k})`;m.style.left=(innerWidth-1280*k)/2+'px';m.style.top=(innerHeight-760*k)/2+'px'}
+if(TV){const b=$('tvexit');let tm;
+  const show=()=>{b.classList.add('on');clearTimeout(tm);tm=setTimeout(()=>{if(!b.matches(':hover'))b.classList.remove('on')},5000)};
+  ['mousemove','touchstart','pointerdown','keydown'].forEach(ev=>addEventListener(ev,show,{passive:true}));
+  b.style.right=(14+innerWidth*MARG/100)+'px';b.style.bottom=(14+innerHeight*MARG/100)+'px';
+  fit();addEventListener('resize',fit);setInterval(()=>{$('upd').textContent=new Date().toLocaleTimeString('pt-BR')},1000);setTimeout(()=>location.reload(),30*60*1000)}
+J('api/info').then(i=>{if(i.organizacao){$('org').textContent=i.organizacao+' · links de internet';document.title='Monitor de Conectividade – '+i.organizacao}}).catch(()=>{});
+tick();loadHist();setInterval(tick,5000);setInterval(loadHist,60000);
+</script></body></html>

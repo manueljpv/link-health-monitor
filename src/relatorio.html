@@ -1,0 +1,204 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: GPL-3.0-only · Copyright (C) 2026 Manuel Pérez -->
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Relatório Mensal – Monitor de Conectividade</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#16191d;--ink2:#4b5563;--mut:#8a93a0;--line:#e3e6ea;
+--ok:#1a7f4b;--okbg:#e4f4ec;--warn:#a15c00;--warnbg:#fdf0d8;--bad:#b42318;--badbg:#fde8e6;
+--c0:#2563c9;--c1:#d4691a;--b0:#2159b8;--b1:#b8530d;--ct:#475569;--bt:#475569;--dn:#0b7f86;--up:#6d3fc4;--info:#2563c9}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1216;--card:#181c22;--ink:#e8ebef;--ink2:#aab2bd;--mut:#7a8491;--line:#2a313a;
+--ok:#4cc38a;--okbg:#12301f;--warn:#f0b04a;--warnbg:#33260c;--bad:#ff7a6e;--badbg:#3a1613;--c0:#6ea3f5;--c1:#f09a55;--b0:#1d4a9a;--b1:#9a420a;--ct:#94a3b8;--bt:#334155;--dn:#3fcfd6;--up:#b79bf2;--info:#7fb0f7}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,Segoe UI,sans-serif}
+main{max-width:1200px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+h1{font-size:22px;margin:0}.sub{color:var(--ink2);font-size:14px;margin-top:2px}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select,.btn{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 12px;font:inherit;text-decoration:none;cursor:pointer}
+.btn.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}.btn.off{opacity:.45;pointer-events:none}
+.lk{border-radius:12px;overflow:hidden;margin-bottom:16px;border:2px solid color-mix(in srgb,var(--lc) 45%,var(--line));background:color-mix(in srgb,var(--lc) 6%,var(--card))}
+.lk .head{background:var(--lcs);color:#fff;padding:10px 16px;font-size:19px;font-weight:700;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}
+.lk .head small{font-size:13px;font-weight:400;opacity:.9}
+.body{padding:14px 16px 16px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.k{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.k span{display:block;font-size:12px;color:var(--ink2);font-weight:600}.k b{display:block;font-size:26px;font-variant-numeric:tabular-nums;line-height:1.2}.k small{font-size:12px;color:var(--ink2)}
+.k.ok b{color:var(--ok)}.k.warn b{color:var(--warn)}.k.bad b{color:var(--bad)}
+.k.dn{border-top:4px solid var(--dn)}.k.up{border-top:4px solid var(--up)}
+h2{font-size:15px;margin:0 0 8px}h2 small{font-weight:400;color:var(--ink2)}
+.cal{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+.cal i,.cal a{width:30px;height:30px;border-radius:6px;font-style:normal;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff;cursor:default;text-decoration:none}
+.cal a{cursor:pointer}.cal a:hover,.cal a:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+.cal .ok{background:var(--ok)}.cal .warn{background:var(--warn);color:#1a1200}.cal .bad{background:var(--bad)}.cal .nd{background:color-mix(in srgb,var(--ink) 12%,transparent);color:var(--mut)}
+.cal .ok{color:#04210f}@media(prefers-color-scheme:light){.cal .ok{color:#fff}.cal .warn{color:#fff}}
+.leg{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin-bottom:14px}.leg i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.scroll{max-height:380px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.scroll.s{max-height:280px}
+table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}th,td{text-align:right;padding:6px 10px;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{position:sticky;top:0;background:var(--card);box-shadow:0 1px 0 var(--line);color:var(--ink2);font-size:12px;font-weight:600}
+tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--ink) 6%,transparent)}
+td.bad{color:var(--bad);font-weight:700}td.warn{color:var(--warn);font-weight:700}
+table.l th,table.l td{text-align:left}
+table.l tr.ev td{background:color-mix(in srgb,var(--kc) 10%,transparent)}table.l tr.ev:nth-child(even) td{background:color-mix(in srgb,var(--kc) 20%,transparent)}
+table.l tr.ev td:first-child{border-left:5px solid var(--kc)}
+.kind{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.05em;padding:1px 8px;border-radius:99px;background:var(--kc);color:#fff;margin-right:6px}
+.dot{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:5px;vertical-align:-1px}
+.k .dr{font-size:14px;line-height:1.7}.k .dr strong{font-variant-numeric:tabular-nums}
+table.l td:last-child{white-space:normal}
+.dnv{color:var(--dn);font-weight:700}.upv{color:var(--up);font-weight:700}
+.note{font-size:13px;color:var(--ink2);margin-top:8px}
+.stk{display:flex;height:26px;border-radius:8px;overflow:hidden;margin:0 0 6px;background:color-mix(in srgb,var(--ink) 12%,transparent)}
+.stk span{display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden}
+.chart{position:relative;margin-bottom:12px}.chart svg{width:100%;height:170px;display:block}
+.tip{position:absolute;top:6px;pointer-events:none;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 9px;font-size:13px;box-shadow:0 2px 8px #0003;display:none;white-space:nowrap;z-index:5}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+@media(max-width:520px){h1{font-size:19px}.two{grid-template-columns:1fr}}
+</style></head><body><main>
+<header><div><h1 id="h1">Relatório mensal de conectividade</h1><div class="sub" id="sub">Disponibilidade, qualidade e velocidade por link</div></div>
+<div class="tools" id="tools"></div></header>
+<div id="out"></div>
+<div class="note" id="rodape"></div>
+</main>
+<script>
+let ORG='';const sub=t=>(ORG?ORG+' · ':'')+t;
+const $=id=>document.getElementById(id);
+const nf=(v,d=1)=>v==null?'—':v.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const hm=s=>{if(s<60)return Math.round(s)+' s';const t=Math.round(s/60),h=Math.floor(t/60),m=t%60;return h?`${h} h ${m} min`:`${m} min`};
+const MESES=['','janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const nomeMes=m=>MESES[+m.slice(5)]+' de '+m.slice(0,4);
+const lvl=(p,hi,lo)=>p>=hi?'ok':p>=lo?'warn':'bad';
+const dm=d=>d.slice(8)+'/'+d.slice(5,7);
+const dtm=t=>new Date(t*1000).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+const hhmm=t=>new Date(t*1000).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+const K={online:['VOLTOU','var(--ok)'],degradado:['DEGRADOU','var(--warn)'],offline:['CAIU','var(--bad)'],failover:['TROCA','var(--info)'],aviso:['AVISO','#8a6d00']};
+function pcts(o){const m=o.mon_s||0;return m?{disp:(o.online_s+o.degr_s)*100/m,qual:o.online_s*100/m}:{disp:null,qual:null}}
+const kp=(cls,t,v,s)=>`<div class="k ${cls||''}"><span>${t}</span><b>${v}</b><small>${s||''}</small></div>`;
+const idx=(nomes,n)=>Math.max(0,nomes.indexOf(n));
+const dotc=(nomes,n)=>`<i class="dot" style="background:${nomes.includes(n)?`var(--c${nomes.indexOf(n)})`:'var(--mut)'}"></i>`;
+
+/* ---------- card de trocas entre links (mês ou dia) ---------- */
+function trocasCard(T,per,nomes,titulo){
+  let h=`<section class="lk" style="--lc:var(--ct);--lcs:var(--bt)"><div class="head"><span>${titulo}</span><small>${per}</small></div><div class="body">`;
+  if(!T||!T.total_s)return h+'<div class="note">Sem dados de trocas para este período.</div></div></section>';
+  const ks=[kp(T.n?'':'ok','Trocas de link',T.n,T.n?'vezes que a rede mudou de link':'a rede ficou sempre no mesmo link')];
+  nomes.forEach(n=>{const x=T.links[n];ks.push(kp('',n+' como link ativo',nf(x.pct,0)+'%',hm(x.ativo_s)+' · assumiu '+x.vezes+'× · maior permanência '+hm(x.maior_s)))});
+  const dir=(T.direcoes||[]).map(d=>`<div class="dr">${dotc(nomes,d.de)}${d.de} → ${d.para}: <strong>${d.n}×</strong></div>`).join('');
+  ks.push(`<div class="k"><span>Trocas por sentido</span>${dir||'<b>—</b>'}</div>`);
+  h+=`<div class="kpis">${ks.join('')}</div>`;
+  const seg=nomes.map((n,i)=>[n,T.links[n].ativo_s,`var(--c${i})`]);if(T.outros_s>0)seg.push(['Indefinido',T.outros_s,'var(--mut)']);
+  h+=`<h2>Quem carregou o tráfego da rede <small>(tempo como link ativo)</small></h2><div class="stk">${seg.map(([n,s,c])=>{const p=s*100/T.total_s;return p>0?`<span style="width:${p}%;background:${c}" title="${n}: ${hm(s)} (${nf(p,1)}%)">${p>=12?n+' '+nf(p,0)+'%':''}</span>`:''}).join('')}</div>
+  <div class="leg">${seg.map(([n,s,c])=>`<span><i style="background:${c}"></i>${n}: ${hm(s)}</span>`).join('')}</div>`;
+  if(T.n){
+    h+=`<h2>Lista de trocas${T.n>T.lista.length?` <small>(as ${T.lista.length} mais recentes de ${T.n})</small>`:''}</h2><div class="scroll s"><table class="l"><thead><tr><th>Quando</th><th>Troca</th><th>Ficou assim por</th></tr></thead><tbody>`;
+    h+=T.lista.map(x=>`<tr><td>${dtm(x.ts)}</td><td>${dotc(nomes,x.de)}${x.de||'?'} → ${dotc(nomes,x.para)}${x.para}</td><td>${hm(x.dur_s)}${x.em_curso?' (em curso)':''}</td></tr>`).join('');
+    h+='</tbody></table></div>';
+  }
+  return h+'<div class="note">Calculado a partir das trocas registradas pelo monitor; considera que o link ativo não mudou enquanto o monitor esteve parado.</div></div></section>'}
+
+/* ---------- visão do mês ---------- */
+function renderMes(R){
+  const nomes=Object.keys(R.links);
+  const ultimo=new Date(+R.mes.slice(0,4),+R.mes.slice(5),0).getDate(),secMes=ultimo*86400;
+  let h='',cob=[];
+  Object.entries(R.links).forEach(([nome,L],i)=>{
+    const r=L.resumo,p=pcts(r),c=L.contratado||{};cob.push(`${nome}: ${nf(r.mon_s*100/secMes,0)}% do mês monitorado`);
+    const dpct=(c.down&&r.down_avg!=null)?r.down_avg*100/c.down:null;
+    h+=`<section class="lk" style="--lc:var(--c${i});--lcs:var(--b${i})"><div class="head"><span>${nome}</span><small>${nomeMes(R.mes)}</small></div><div class="body">
+    <div class="kpis">
+    ${kp(p.disp==null?'':lvl(p.disp,99.9,99),'Disponível (sem ficar offline)',p.disp==null?'—':nf(p.disp,2)+'%','tempo fora do ar: '+hm(r.off_s))}
+    ${kp(p.qual==null?'':lvl(p.qual,99,95),'Com qualidade boa',p.qual==null?'—':nf(p.qual,2)+'%','degradado: '+hm(r.degr_s))}
+    ${kp(r.quedas?'bad':'ok','Quedas',r.quedas,'assumiu o tráfego '+r.failovers+'×')}
+    ${kp('','Latência média',nf(r.rtt_avg,1)+' ms','p95 do pior dia: '+nf(r.rtt_p95,0)+' ms')}
+    ${kp('','Perda média',nf(r.loss_avg,2)+'%','')}
+    ${kp('dn','⬇ Download médio',nf(r.down_avg,0)+' Mbps',(dpct!=null?nf(dpct,0)+'% de '+c.down+' Mbps'+(c.garantido===false?' (não garantido)':'')+' · ':'')+'mín '+nf(r.down_min,0)+' · máx '+nf(r.down_max,0))}
+    ${kp('','Tempo monitorado',hm(r.mon_s),nf(r.mon_s*100/secMes,0)+'% do mês')}
+    ${kp('up','⬆ Upload médio',nf(r.up_avg,0)+' Mbps','mín '+nf(r.up_min,0)+' · máx '+nf(r.up_max,0)+' · '+r.n_speed+' testes')}
+    </div>
+    <h2>Dia a dia (cor = tempo com qualidade boa) <small>— clique em um dia para ver os detalhes</small></h2><div class="cal">`;
+    for(let d=1;d<=ultimo;d++){
+      const dia=R.mes+'-'+String(d).padStart(2,'0'),x=L.dias.find(y=>y.day===dia);
+      if(!x){h+=`<i class="nd" title="${d}/${R.mes.slice(5)}: sem dados">${d}</i>`;continue}
+      const q=pcts(x);
+      h+=`<a class="${lvl(q.qual,99,95)}" href="#${dia}" aria-label="Ver detalhes do dia ${d}" title="${String(d).padStart(2,'0')}/${R.mes.slice(5)}: disponível ${nf(q.disp,2)}% · qualidade boa ${nf(q.qual,2)}% · ${x.quedas} queda(s) · ${hm(x.off_s)} offline — clique para ver o dia">${d}</a>`}
+    h+=`</div><div class="leg"><span><i style="background:var(--ok)"></i>qualidade ≥ 99%</span><span><i style="background:var(--warn)"></i>95 a 99%</span><span><i style="background:var(--bad)"></i>abaixo de 95%</span><span><i style="background:color-mix(in srgb,var(--ink) 20%,transparent)"></i>sem dados</span></div>
+    <div class="scroll"><table><thead><tr><th>Dia</th><th>Disponível</th><th>Qualidade boa</th><th>Offline</th><th>Quedas</th><th>Latência média</th><th>p95</th><th>Perda</th><th>⬇ Download</th><th>⬆ Upload</th></tr></thead><tbody>`;
+    h+=L.dias.slice().reverse().map(x=>{const q=pcts(x);
+      return `<tr><td>${dm(x.day)}</td><td class="${q.disp<99.9?(q.disp<99?'bad':'warn'):''}">${nf(q.disp,2)}%</td><td class="${q.qual<99?(q.qual<95?'bad':'warn'):''}">${nf(q.qual,2)}%</td><td>${x.off_s?hm(x.off_s):'—'}</td><td class="${x.quedas?'bad':''}">${x.quedas}</td><td>${nf(x.rtt_avg,1)} ms</td><td>${nf(x.rtt_p95,0)} ms</td><td>${nf(x.loss_avg,2)}%</td><td>${nf(x.down_avg,0)} Mbps</td><td>${nf(x.up_avg,0)} Mbps</td></tr>`}).join('');
+    h+='</tbody></table></div></div></section>'});
+  if(h)h+=trocasCard(R.trocas,nomeMes(R.mes),nomes,'Trocas entre links');
+  $('out').innerHTML=h||'<div class="note">Ainda não há dados para este mês.</div>';
+  $('rodape').textContent='Disponível = tempo sem estar offline. Qualidade boa = tempo sem estar offline nem degradado. Os percentuais consideram só o tempo em que o monitor esteve rodando. '+cob.join(' · ')}
+
+/* ---------- visão do dia ---------- */
+function curva(L,D,i){
+  const s=L.serie;if(!s.length)return '<div class="note">Gráfico de latência indisponível: as medições detalhadas são guardadas por 30 dias (o resumo do dia continua valendo).</div>';
+  const W=900,Ht=170,m={l:40,r:8,t:8,b:22},a=D.a,b=D.b,bk=D.bucket;
+  const ymax=Math.max(20,...s.map(r=>r[1]||0))*1.1;
+  const x=t=>m.l+(t-a)/(b-a)*(W-m.l-m.r),y=v=>Ht-m.b-v/ymax*(Ht-m.t-m.b);
+  let g='';for(let k=0;k<=4;k++){const v=ymax*k/4;g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${m.l-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--mut)">${v.toFixed(v<10?1:0)}</text>`}
+  for(let k=0;k<=8;k++){const t=a+(b-a)*k/8;g+=`<text x="${x(t)}" y="${Ht-6}" text-anchor="${k==8?'end':k==0?'start':'middle'}" font-size="11" fill="var(--mut)">${String(k*3%24).padStart(2,'0')}h</text>`}
+  s.forEach(r=>{if(r[3]!=null&&r[3]>=100)g+=`<rect x="${x(r[0])}" width="${Math.max(2,x(a+bk)-x(a))}" y="${m.t}" height="${Ht-m.t-m.b}" fill="var(--bad)" opacity=".18"/>`});
+  let d='',pen=false,prev=null;s.forEach(r=>{if(r[1]==null||(prev!=null&&r[0]-prev>bk*2))pen=false;prev=r[0];if(r[1]==null)return;d+=(pen?'L':'M')+x(r[0]).toFixed(1)+' '+y(r[1]).toFixed(1);pen=true});
+  g+=`<path d="${d}" fill="none" stroke="var(--c${i})" stroke-width="2" stroke-linejoin="round"/>`;
+  const id='c'+i;
+  setTimeout(()=>{const root=$(id);if(!root)return;const svg=root.querySelector('svg'),tip=root.querySelector('.tip');
+    svg.onmousemove=e=>{const bb=svg.getBoundingClientRect(),px=(e.clientX-bb.left)/bb.width*W,t=a+(px-m.l)/(W-m.l-m.r)*(b-a);
+      const r=s.reduce((p,c)=>Math.abs(c[0]-t)<Math.abs(p[0]-t)?c:p,s[0]);if(Math.abs(r[0]-t)>bk*2){tip.style.display='none';return}
+      const off=r[0]-a,hh=String(Math.floor(off/3600)).padStart(2,'0'),mm=String(Math.floor(off%3600/60)).padStart(2,'0');
+      tip.style.display='block';tip.innerHTML=`<span style="color:var(--mut)">${hh}:${mm}</span> · <b>${r[3]>=100?'sem resposta':nf(r[1],0)+' ms'}</b> · perda máx ${nf(r[3],0)}%`;
+      tip.style.left=Math.min(e.clientX-bb.left+12,bb.width-200)+'px'};
+    svg.onmouseleave=()=>tip.style.display='none'},0);
+  return `<h2>Latência ao longo do dia <small>(média a cada 5 min; faixa vermelha = link sem resposta)</small></h2><div class="chart" id="${id}"><svg viewBox="0 0 ${W} ${Ht}" preserveAspectRatio="none">${g}</svg><div class="tip"></div></div>`}
+
+function renderDia(D){
+  const nomes=Object.keys(D.links),[Y,Mo,Dd]=D.dia.split('-').map(Number);
+  const tit=new Date(Y,Mo-1,Dd).toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  $('h1').textContent=tit.charAt(0).toUpperCase()+tit.slice(1);
+  $('sub').textContent=sub('O que aconteceu neste dia, por link');
+  let h='';
+  nomes.forEach((nome,i)=>{
+    const L=D.links[nome],r=L.resumo,c=L.contratado||{};
+    h+=`<section class="lk" style="--lc:var(--c${i});--lcs:var(--b${i})"><div class="head"><span>${nome}</span><small>${dm(D.dia)}/${Y}</small></div><div class="body">`;
+    if(!r){h+='<div class="note">Sem resumo para este dia.</div></div></section>';return}
+    const p=pcts(r),dpct=(c.down&&r.down_avg!=null)?r.down_avg*100/c.down:null;
+    h+=`<div class="kpis">
+    ${kp(p.disp==null?'':lvl(p.disp,99.9,99),'Disponível (sem ficar offline)',p.disp==null?'—':nf(p.disp,2)+'%','tempo fora do ar: '+hm(r.off_s))}
+    ${kp(p.qual==null?'':lvl(p.qual,99,95),'Com qualidade boa',p.qual==null?'—':nf(p.qual,2)+'%','degradado: '+hm(r.degr_s))}
+    ${kp(r.quedas?'bad':'ok','Quedas',r.quedas,'assumiu o tráfego '+r.failovers+'×')}
+    ${kp('','Latência média',nf(r.rtt_avg,1)+' ms','p95 '+nf(r.rtt_p95,0)+' ms · máx '+nf(r.rtt_max,0)+' ms')}
+    ${kp('','Perda média',nf(r.loss_avg,2)+'%','jitter médio '+nf(r.jitter_avg,1)+' ms · DNS '+nf(r.dns_avg,0)+' ms')}
+    ${kp('dn','⬇ Download médio',nf(r.down_avg,0)+' Mbps',(dpct!=null?nf(dpct,0)+'% de '+c.down+' Mbps'+(c.garantido===false?' (não garantido)':'')+' · ':'')+'mín '+nf(r.down_min,0)+' · máx '+nf(r.down_max,0))}
+    ${kp('','Tempo monitorado',hm(r.mon_s),nf(r.mon_s*100/86400,0)+'% do dia')}
+    ${kp('up','⬆ Upload médio',nf(r.up_avg,0)+' Mbps','mín '+nf(r.up_min,0)+' · máx '+nf(r.up_max,0)+' · '+r.n_speed+' testes')}
+    </div>${curva(L,D,i)}</div></section>`});
+  h+=trocasCard(D.trocas,dm(D.dia)+'/'+Y,nomes,'Trocas entre links neste dia');
+  h+=`<div class="two"><div class="card"><h2>Eventos do dia</h2><div class="scroll s"><table class="l"><thead><tr><th>Hora</th><th>Link</th><th>Evento</th></tr></thead><tbody>`
+    +(D.eventos.length?D.eventos.map(e=>{const k=K[e[2]]||[e[2].toUpperCase(),'var(--ink2)'];return `<tr class="ev" style="--kc:${k[1]}"><td>${hhmm(e[0])}</td><td>${dotc(nomes,e[1])}${e[1]}</td><td><span class="kind">${k[0]}</span>${e[3]}</td></tr>`}).join(''):'<tr><td colspan=3>Nenhum evento neste dia.</td></tr>')
+    +`</tbody></table></div></div><div class="card"><h2>Testes de velocidade do dia</h2><div class="scroll s"><table class="l"><thead><tr><th>Hora</th><th>Link</th><th>⬇ Download (Mbps)</th><th>⬆ Upload (Mbps)</th></tr></thead><tbody>`
+    +(D.velocidade.length?D.velocidade.map(v=>`<tr><td>${hhmm(v[0])}</td><td>${dotc(nomes,v[1])}${v[1]}</td><td class="dnv">${nf(v[2],0)}</td><td class="upv">${nf(v[3],0)}</td></tr>`).join(''):'<tr><td colspan=4>Nenhum teste neste dia.</td></tr>')
+    +'</tbody></table></div></div></div>';
+  $('out').innerHTML=h;
+  $('rodape').textContent='Disponível = tempo sem estar offline. Qualidade boa = tempo sem estar offline nem degradado. Os dias seguem o horário do servidor.'}
+
+/* ---------- navegação (o endereço guarda o que está sendo visto: #2026-10 ou #2026-10-07) ---------- */
+function barraMes(R){
+  $('tools').innerHTML=`<a class="btn" href="./">← Painel</a><select id="mes">${(R.meses.length?R.meses:[R.mes]).map(m=>`<option value="${m}" ${m===R.mes?'selected':''}>${nomeMes(m)}</option>`).join('')}</select><a class="btn pri" href="api/relatorio.csv?mes=${R.mes}">Baixar CSV</a>`;
+  $('mes').onchange=e=>{location.hash='#'+e.target.value}}
+function barraDia(D){
+  const nav=(d,t)=>d?`<a class="btn" href="#${d}">${t}</a>`:`<span class="btn off">${t}</span>`;
+  $('tools').innerHTML=`<a class="btn pri" href="#${D.dia.slice(0,7)}">← Voltar ao mês</a>${nav(D.anterior,'‹ '+(D.anterior?dm(D.anterior):'dia anterior'))}${nav(D.proximo,(D.proximo?dm(D.proximo):'dia seguinte')+' ›')}<a class="btn" href="./">Painel</a>`}
+async function carregarMes(mes){
+  $('h1').textContent='Relatório mensal de conectividade';$('sub').textContent=sub('Disponibilidade, qualidade e velocidade por link');
+  const R=await (await fetch('api/relatorio'+(mes?'?mes='+mes:''))).json();
+  barraMes(R);renderMes(R)}
+async function carregarDia(dia){
+  const r=await fetch('api/dia?dia='+dia);if(!r.ok){$('out').innerHTML='<div class="note">Dia inválido.</div>';return}
+  const D=await r.json();barraDia(D);renderDia(D)}
+async function rota(){
+  const h=location.hash.slice(1);window.scrollTo(0,0);
+  try{await (/^\d{4}-\d{2}-\d{2}$/.test(h)?carregarDia(h):carregarMes(/^\d{4}-\d{2}$/.test(h)?h:''))}
+  catch(e){$('out').innerHTML='<div class="note">⚠ sem comunicação com o coletor</div>'}}
+addEventListener('hashchange',rota);
+fetch('api/info').then(r=>r.json()).then(i=>{ORG=i.organizacao||'';if(ORG)document.title+=' – '+ORG}).catch(()=>{}).then(rota);
+</script></body></html>

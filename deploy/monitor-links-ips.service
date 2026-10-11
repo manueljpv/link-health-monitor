@@ -1,0 +1,20 @@
+# Cria, a cada boot, os IPs secundarios que o monitor usa como origem dos testes (um por link).
+# ATENCAO: 192.0.2.12 e 192.0.2.13 sao enderecos de EXEMPLO. Troque por dois IPs livres da sua LAN
+# (fora do DHCP) e ajuste o prefixo (/24) e a interface (eth0) para o seu servidor.
+# Usa um servico systemd, e nao a configuracao de rede do sistema, para que o hipervisor ou o
+# gerenciador de rede nao desfaca os IPs.
+[Unit]
+Description=IPs secundarios do monitor de links
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/ip addr add 192.0.2.12/24 dev eth0
+ExecStart=/usr/sbin/ip addr add 192.0.2.13/24 dev eth0
+ExecStop=/usr/sbin/ip addr del 192.0.2.12/24 dev eth0
+ExecStop=/usr/sbin/ip addr del 192.0.2.13/24 dev eth0
+
+[Install]
+WantedBy=multi-user.target

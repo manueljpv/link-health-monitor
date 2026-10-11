@@ -1,0 +1,13 @@
+[Unit]
+Description=Monitor de saude dos links de internet
+After=network-online.target monitor-links-ips.service
+Wants=monitor-links-ips.service
+
+[Service]
+WorkingDirectory=/opt/monitor-links
+ExecStart=/usr/bin/python3 /opt/monitor-links/collector.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

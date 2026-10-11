@@ -1,0 +1,20 @@
+# Dados reais e configuração local: nunca vão para o repositório
+config.json
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+
+# Pacotes, cópias e temporários
+*.tar.gz
+*.bak
+*.log
+__pycache__/
+*.pyc
+
+# Sistema e editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

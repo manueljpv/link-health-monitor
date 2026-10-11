@@ -1,0 +1,52 @@
+{
+  "organizacao": "Sua Empresa",
+  "bind": "0.0.0.0",
+  "porta_http": 8080,
+  "intervalo_s": 10,
+  "retencao_dias": 30,
+  "teste_velocidade_min": 180,
+  "medir_agora_intervalo_s": 300,
+  "alvos_ping": ["1.1.1.1", "8.8.8.8", "9.9.9.9"],
+  "dns": {
+    "nome": "www.google.com",
+    "servidores": [
+      {"rotulo": "Cloudflare", "servidor": "1.1.1.1"},
+      {"rotulo": "Google", "servidor": "8.8.8.8"}
+    ]
+  },
+  "provedores_ip": [
+    ["api.ipify.org", "/"],
+    ["icanhazip.com", "/"],
+    ["checkip.amazonaws.com", "/"]
+  ],
+  "velocidade_tamanhos_reserva_mb": [10, 5],
+  "links": [
+    {
+      "nome": "Link 1",
+      "ip_origem": "192.0.2.12",
+      "rtt_aviso_ms": 60,
+      "perda_aviso_pct": 3,
+      "ip_publico_esperado": "203.0.113.10",
+      "velocidade_download_mb": 25,
+      "velocidade_upload_mb": 5,
+      "velocidade_conexoes": 4,
+      "contratado": {"down": 300, "up": null, "garantido": true},
+      "dns_extra": [
+        {"rotulo": "DNS do provedor 1", "servidor": "198.51.100.53"}
+      ]
+    },
+    {
+      "nome": "Link 2",
+      "ip_origem": "192.0.2.13",
+      "rtt_aviso_ms": 120,
+      "perda_aviso_pct": 5,
+      "ip_publico_esperado": null,
+      "ip_publico_proibido": ["203.0.113.10"],
+      "velocidade_download_mb": 25,
+      "velocidade_upload_mb": 3,
+      "velocidade_conexoes": 4,
+      "contratado": {"down": 150, "up": null, "garantido": false},
+      "dns_extra": []
+    }
+  ]
+}
